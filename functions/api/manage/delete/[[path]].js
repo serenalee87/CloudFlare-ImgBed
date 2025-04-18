@@ -1,4 +1,18 @@
-import { S3Client, DeleteObjectCommand } from "@aws-sdk/client-s3";
+import { AwsClient } from "aws4fetch";
+export default {
+  async fetch(request, env) {
+    const s3 = new AwsClient({
+      accessKeyId: env.AWS_ACCESS_KEY_ID,
+      secretAccessKey: env.AWS_SECRET_ACCESS_KEY,
+    });
+    const url = new URL(request.url);
+    const key = url.pathname.slice('/api/manage/delete/'.length);
+    const s3Url = `https://${env.BUCKET_NAME}.s3.amazonaws.com/${key}`;
+    await s3.fetch(s3Url, { method: 'DELETE' });
+    return new Response('Deleted successfully');
+  }
+}
+
 import { purgeCFCache } from "../../../utils/purgeCache";
 
 export async function onRequest(context) {
